@@ -15,19 +15,125 @@ RNA-Seq Tutorial
 
 This RNA-Seq tutorial is designed to give you an insight into how to download data from the Sequence Read Archive (SRA), run quality control, trimming, and alignments on the command line, and analyze the results using DESeq2. 
 
+This tutorial was made to be run on a high-throughput computing cluster with SLURM job manager. This can be done on your own system if the necessary software is installed. Please note that some of the steps are computationally heavy and will take a longer time on your local system. 
+
 ---
 
 
 ---
+
+First we will be creating a custom script to:
+
+1. Download the RNA-Seq Datasets
+2. Check the quality of the read
+3. Trim the reads for low quality and adapters (if needed)
+4. Align the reads to the reference genome 
+5. Convert and sort file formats
+6. Create a feature counts matrix 
+
+---
+
 
 ```{bash}
 
+# Login to the cluster and create a new directory for this tutorial
+# This is where all of the files will be located 
+mkdir rna_seq_tutorial
 
+# Open up a text editor in the new file (I use nano) and we will begin to write the first script
+cd rna_seq_tutorial
+nano
+
+```
+
+
+```{bash}
+
+# Create a header for your script
+
+
+```
+
+```{bash}
+
+# Import modules
+
+```
+
+```{bash}
+
+# Download Data from the SRA
+
+```
+
+```{bash}
+
+# Run FASTQC and visualize quality
+
+```
+
+```{bash}
+
+# Trim reads
+
+```
+
+```{bash}
+
+# Align reads to reference genome
+
+```
+
+```{bash}
+
+# Convert SAM file to BAM file and sort
+
+```
+
+```{bash}
+
+# Create a feature counts matrix
+
+```
+
+```{bash}
+
+# The final script should look like this:
 
 ```
 
 
 ---
 
+# Now save your script as <file_name>.sh
+
+---
+
+```{r}
+
+# To run your script
+
+```
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
 
 ---
