@@ -1,0 +1,33 @@
+---
+title: "rna_seq_tutorial"
+author: "Shaleigh Smith"
+date: "4/29/2019"
+output: html_document
+---
+
+
+
+---
+
+RNA-Seq Tutorial
+
+---
+
+This RNA-Seq tutorial is designed to give you an insight into how to download data from the Sequence Read Archive (SRA), run quality control, trimming, and alignments on the command line, and analyze the results using DESeq2. 
+
+---
+
+
+---
+
+```{bash}
+
+
+
+```
+
+
+---
+
+
+---
