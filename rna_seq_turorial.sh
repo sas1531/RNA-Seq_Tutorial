@@ -1,13 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=ngs5  # Job name
-#SBATCH --mail-type=END,FAIL # Mail events (NONE, BEGIN, END, FAIL, ALL)
-#SBATCH --mail-user=shaleigh.smith@nyulangone.org # Where to send mail
-#SBATCH --ntasks=4 # Run on a single CPU
-#SBATCH --mem=32gb # Job memory request
-#SBATCH --time=10:00:00 # Time limit hrs:min:sec
-#SBATCH --ntasks=4
-#SBATCH --output=/gpfs/scratch/sas1531/ngs5_coursework/ngs5_%j.log # Standard output and error log
-#SBATCH -p cpu_short
+#SBATCH --job-name=rna_seq  ### Job name
+#SBATCH --mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=firstname.lastname@nyulangone.org # Where to send mail
+#SBATCH --ntasks=4 ### Run on a 4 CPU
+#SBATCH --mem=64gb ### Job memory request
+#SBATCH --time=10:00:00 ### Time limit hrs:min:sec
+#SBATCH --output=./rna_seq_%j.log ### Standard output and error log
+#SBATCH -p cpu_short ### Node
 
 # Download the Human Genome (hg38)
 wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz
