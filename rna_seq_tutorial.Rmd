@@ -19,12 +19,18 @@ This tutorial was made to be run on a high-throughput computing cluster with SLU
 
 ---
 
+We will be working with lung adenocarcinoma RNA-Seq data obtained from:
+
+Seo JS, Ju YS, Lee WC, Shin JY et al. The transcriptional landscape and mutational profile of lung adenocarcinoma. Genome Res 2012 Nov;22(11):2109-19. PMID: 22975805
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE40419
+
+This includes paired normal and tumor samples. We will only be using a small subset of the samples, though the entire dataset is available for download
 
 ---
 
 First we will be creating a custom script to:
 
-1. Download the RNA-Seq Datasets
+1. Download the RNA-Seq Datasets & Human Genome
 2. Check the quality of the read
 3. Trim the reads for low quality and adapters (if needed)
 4. Align the reads to the reference genome 
@@ -46,53 +52,126 @@ nano
 
 ```
 
+---
+
+Create a submitter script. This will submit you script for you and run the following tasks on each dataset in parallel.
+
+See submitter.txt in file (or below)
+
+---
 
 ```{bash}
 
-# Create a header for your script
+#!/bin/bash
+#SBATCH --job-name=job_submitter      ### name of job
+#SBATCH --nodes=1                     ### number of nodes to run on
+#SBATCH --mem=200MB                   ### memory
+#SBATCH --time=1:00:00                ### time 
+#SBATCH --error=job_sub_error.txt     ### output error file
+#SBATCH --output=job_sub_stdout.txt   ### output standard file
 
+sbatch --array=1 rna_seq_script.sh LC_C1 ERX140427
+sbatch --array=1 rna_seq_script.sh LC_C2 ERX140428
+sbatch --array=1 rna_seq_script.sh LC_C3 ERX140429
+sbatch --array=1 rna_seq_script.sh LC_C5 ERX140431
+sbatch --array=1 rna_seq_script.sh LC_C1_nor ERX140350
+sbatch --array=1 rna_seq_script.sh LC_C2_nor ERX140351
+sbatch --array=1 rna_seq_script.sh LC_C3_nor ERX140352
+sbatch --array=1 rna_seq_script.sh LC_C5_nor ERX140353
+
+# Save this as submitter.sh
 
 ```
+
+
+```{bash}
+
+# Create a header for your rna script
+
+```
+
+
+```{bash}
+
+# Download the Human Genome (hg38) 
+wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz
+tar -zxvf Homo_sapiens_UCSC_hg38.tar.gz
+
+```
+
 
 ```{bash}
 
 # Import modules
+module load sratoolkit/2.9.1
+module load fastqc/0.11.7
+module load trimgalore/0.5.0
+module load python/cpu/2.7.15-ES ### CutAdapt is hidden in here
+module load bbmap/38.25
+module load samtools/1.9
+module load subread/1.6.3
 
 ```
 
 ```{bash}
 
 # Download Data from the SRA
+fastq-dump ${1} --split-files --gzip -O ./
+
+# Remove fastq-dump directory
+rm -r ~/ncbi
+
+# Rename files
+mv ./${1}*fastq.gz ./${2}.fastq.gz
 
 ```
 
 ```{bash}
 
-# Run FASTQC and visualize quality
-
-```
-
-```{bash}
-
-# Trim reads
+# Trim and run FASTQC
+trim_galore --q 30 \
+--phred33 \
+-o ./ \
+--paired \
+--fastqc \
+./${2}_1.fastq.gz \
+./${2}_2.fastq.gz
 
 ```
 
 ```{bash}
 
 # Align reads to reference genome
+bbmap.sh \
+-Xmx26G \
+ref=./hg38/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa \
+in=./${2}_val_1.fq.gz \
+in2=./${2}_val_2.fq.gz \
+outm=./${2}.sam \
+minid=0.90 \
+ambiguous=random \
+nodisk \
 
 ```
 
 ```{bash}
 
 # Convert SAM file to BAM file and sort
+samtools view -S -b ${2}.sam > ${2}..bam
+samtools sort ${2}.bam -o ${2}_sorted.bam
 
 ```
+
+
+There is a large variety of flags that can be used for feature counts. In this case we will be more stringent with the following parameters.
+
+The input is specified as reversely stranded (-s 2) and paired end (-p). The fragment length is checked (-P) and only the fragments that have both ends successfully aligned are counted (-B). Chimeric fragments are ignored (-C) as are duplicates (--ignoreDup). Finally, only primary alignments are counted (--primary) and the counts are based on gene_id (-g).
+
 
 ```{bash}
 
 # Create a feature counts matrix
+featureCounts -s 2 -p -B -C -P --ignoreDup --primary -a ./hg38/Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o ${2}_feature_counts ./${2}_sorted.bam
 
 ```
 
@@ -105,21 +184,37 @@ nano
 
 ---
 
-# Now save your script as <file_name>.sh
+# Save the script as rna_seq_script.sh
 
 ---
 
-```{r}
+```{bash}
 
-# To run your script
+# To run your submitter script (this will submit all 8 scripts, one for each dataset)
+./submitter.sh
 
 ```
 
 
 ---
 
+Check your output. It should include:
+
+
+
 
 ---
+
+The downstream analysis will be done in R using DESeq2. 
+
+---
+
+
+```{r}
+
+# Import feature count matrices
+
+```
 
 
 ---
