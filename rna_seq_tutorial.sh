@@ -44,8 +44,8 @@ trim_galore --q 30 \
 bbmap.sh \
 -Xmx26G \
 ref=./Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa \
-in=./${2}_val_1.fq.gz \
-in2=./${2}_val_2.fq.gz \
+in=./${2}_1_val_1.fq.gz \
+in2=./${2}_2_val_2.fq.gz \
 outm=./${2}.sam \
 minid=0.90 \
 ambiguous=random \
