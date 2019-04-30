@@ -70,14 +70,14 @@ See submitter.txt in file (or below)
 #SBATCH --error=job_sub_error.txt     ### output error file
 #SBATCH --output=job_sub_stdout.txt   ### output standard file
 
-sbatch --array=1 rna_seq_script.sh LC_C1 ERX140427
-sbatch --array=1 rna_seq_script.sh LC_C2 ERX140428
-sbatch --array=1 rna_seq_script.sh LC_C3 ERX140429
-sbatch --array=1 rna_seq_script.sh LC_C5 ERX140431
-sbatch --array=1 rna_seq_script.sh LC_C1_nor ERX140350
-sbatch --array=1 rna_seq_script.sh LC_C2_nor ERX140351
-sbatch --array=1 rna_seq_script.sh LC_C3_nor ERX140352
-sbatch --array=1 rna_seq_script.sh LC_C5_nor ERX140353
+sbatch --array=1 rna_seq_script.sh ERX140427  LC_C1
+sbatch --array=1 rna_seq_script.sh ERX140428  LC_C2
+sbatch --array=1 rna_seq_script.sh ERX140429  LC_C3
+sbatch --array=1 rna_seq_script.sh ERX140431  LC_C5
+sbatch --array=1 rna_seq_script.sh ERX140350  LC_C1_nor
+sbatch --array=1 rna_seq_script.sh ERX140351  LC_C2_nor
+sbatch --array=1 rna_seq_script.sh ERX140352  LC_C3_nor
+sbatch --array=1 rna_seq_script.sh ERX140353  LC_C5_nor
 
 # Save this as submitter.sh
 
@@ -94,7 +94,7 @@ sbatch --array=1 rna_seq_script.sh LC_C5_nor ERX140353
 #SBATCH --mail-user=name.last@school.org     ### Where to send mail
 #SBATCH --ntasks=4                           ### Run on a 4 CPU
 #SBATCH --mem=64gb                           ### Job memory request
-#SBATCH --time=10:00:00                      ### Time limit hrs:min:sec
+#SBATCH --time=12:00:00                      ### Time limit hrs:min:sec
 #SBATCH --output=./rna_seq_%j.log            ### Standard output and error log
 #SBATCH -p cpu_short                         ### Node 
 
@@ -132,7 +132,8 @@ fastq-dump ${1} --split-files --gzip -O ./
 rm -r ~/ncbi
 
 # Rename files
-mv ./${1}*fastq.gz ./${2}.fastq.gz
+mv ./${1}_1*fastq.gz ./${2}_1.fastq.gz
+mv ./${1}_2*fastq.gz ./${2}_2.fastq.gz
 
 ```
 
@@ -154,7 +155,7 @@ trim_galore --q 30 \
 # Align reads to reference genome
 bbmap.sh \
 -Xmx26G \
-ref=./hg38/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa \
+ref=./Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa \
 in=./${2}_val_1.fq.gz \
 in2=./${2}_val_2.fq.gz \
 outm=./${2}.sam \
@@ -181,7 +182,7 @@ The input is specified as reversely stranded (-s 2) and paired end (-p). The fra
 ```{bash}
 
 # Create a feature counts matrix
-featureCounts -s 2 -p -B -C -P --ignoreDup --primary -a ./hg38/Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o ${2}_feature_counts ./${2}_sorted.bam
+featureCounts -s 2 -p -B -C -P --ignoreDup --primary -a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o ${2}_feature_counts ./${2}_sorted.bam
 
 ```
 
@@ -196,7 +197,7 @@ featureCounts -s 2 -p -B -C -P --ignoreDup --primary -a ./hg38/Homo_sapiens/UCSC
 #SBATCH --mail-user=name.last@school.org     ### Where to send mail
 #SBATCH --ntasks=4                           ### Run on a 4 CPU
 #SBATCH --mem=64gb                           ### Job memory request
-#SBATCH --time=10:00:00                      ### Time limit hrs:min:sec
+#SBATCH --time=12:00:00                      ### Time limit hrs:min:sec
 #SBATCH --output=./rna_seq_%j.log            ### Standard output and error log
 #SBATCH -p cpu_short                         ### Node 
 
@@ -220,7 +221,8 @@ fastq-dump ${1} --split-files --gzip -O ./
 rm -r ~/ncbi
 
 # Rename files
-mv ./${1}*fastq.gz ./${2}.fastq.gz
+mv ./${1}_1*fastq.gz ./${2}_1.fastq.gz
+mv ./${1}_2*fastq.gz ./${2}_2.fastq.gz
 
 # Trim and run FASTQC
 trim_galore --q 30 \

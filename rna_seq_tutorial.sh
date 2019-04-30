@@ -4,7 +4,7 @@
 #SBATCH --mail-user=firstname.lastname@nyulangone.org # Where to send mail
 #SBATCH --ntasks=4 ### Run on a 4 CPU
 #SBATCH --mem=64gb ### Job memory request
-#SBATCH --time=10:00:00 ### Time limit hrs:min:sec
+#SBATCH --time=12:00:00 ### Time limit hrs:min:sec
 #SBATCH --output=./rna_seq_%j.log ### Standard output and error log
 #SBATCH -p cpu_short ### Node
 
@@ -28,7 +28,8 @@ fastq-dump ${1} --split-files --gzip -O ./
 rm -r ~/ncbi
 
 # Rename files
-mv ./${1}*fastq.gz ./${2}.fastq.gz
+mv ./${1}_1*fastq.gz ./${2}_1.fastq.gz
+mv ./${1}_2*fastq.gz ./${2}_2.fastq.gz
 
 # Trim
 trim_galore --q 30 \
@@ -42,7 +43,7 @@ trim_galore --q 30 \
 # Align
 bbmap.sh \
 -Xmx26G \
-ref=./hg38/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa \
+ref=./Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa \
 in=./${2}_val_1.fq.gz \
 in2=./${2}_val_2.fq.gz \
 outm=./${2}.sam \
@@ -55,4 +56,4 @@ samtools view -S -b ${2}.sam > ${2}..bam
 samtools sort ${2}.bam -o ${2}_sorted.bam
 
 # Create feature counts matrix
-featureCounts -s 2 -p -B -C -P --ignoreDup --primary -a ./hg38/Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o ${2}_feature_counts ./${2}_sorted.bam
+featureCounts -s 2 -p -B -C -P --ignoreDup --primary -a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o ${2}_feature_counts ./${2}_sorted.bam
