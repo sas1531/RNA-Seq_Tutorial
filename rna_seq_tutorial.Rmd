@@ -270,29 +270,447 @@ featureCounts -s 2 -p -B -C -P --ignoreDup --primary -a ./hg38/Homo_sapiens/UCSC
 
 ---
 
-Check your output. It should include:
+Check the output. It should include these files for each dataset:
 
+LC_C1_1.fastq.gz
+LC_C1_1.fastq.gz_trimming_report.txt
+LC_C1_1_val_1_fastqc.html
+LC_C1_1_val_1_fastqc.zip
+LC_C1_1_val_1.fq.gz
+LC_C1_2.fastq.gz
+LC_C1_2.fastq.gz_trimming_report.txt
+LC_C1_2_val_2_fastqc.html
+LC_C1_2_val_2_fastqc.zip
+LC_C1_2_val_2.fq.gz
+LC_C1.bam
+LC_C1_feature_counts
+LC_C1_feature_counts.summary
 
-
+Copy the feature counts files to your local directory. You can do this using a command or an application like FileZilla. 
 
 ---
 
-The downstream analysis will be done in R using DESeq2. 
+The downstream analysis will be done in R using DESeq2. Open up a new script in R - I prefer using an R Markdown file so that you can visualize the results for each step. 
+
+The general workflow is as follows:
+
+1. Import count matrices
+2. Normalization
+3. Transformation
+4. LFC shrinkage
+5. Data exploration (sample relatedness)
+6. Difference gene expression analysis
 
 ---
+
+```{r}
+
+# Load Libraries
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(DESeq2)
+#library(purrr)
+library(ComplexHeatmap)
+library(circlize)
+library(ggplot2)
+library(ggfortify)
+#library(vsn)
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(genefilter)
+library(biomaRt)
+library(data.table)
+#library(IHW)
+#library(VennDiagram)
+#library(gridExtra)
+
+# Not all of these are required - this depends on how you choose to visualize your results 
+
+```
 
 
 ```{r}
 
-# Import feature count matrices
+### Import & clean gene count files
+
+count_1 <- read.table("LC_C1_nor_feature_counts", header=TRUE) 
+colnames(count_1)[c(1, 7)] <- c("gene_id", "LC_C1_nor")
+count_1 <- dplyr::select(count_1, gene_id, LC_C1_nor)
+count_1$gene_id <- substring(count_1$gene_id, 1, 15)
+
+count_2 <- read.table("LC_C1_feature_counts", header=TRUE) 
+colnames(count_2)[c(1, 7)] <- c("gene_id", "LC_C1")
+count_2 <- dplyr::select(count_2, gene_id, LC_C1)
+count_2$gene_id <- substring(count_2$gene_id, 1, 15)
+
+count_3 <- read.table("LC_C2_nor_feature_counts", header=TRUE) 
+colnames(count_3)[c(1, 7)] <- c("gene_id", "LC_C2_nor")
+count_3 <- dplyr::select(count_3, gene_id, LC_C2_nor)
+count_3$gene_id <- substring(count_3$gene_id, 1, 15)
+
+count_4 <- read.table("LC_C2_feature_counts", header=TRUE) 
+colnames(count_4)[c(1, 7)] <- c("gene_id", "LC_C2")
+count_4 <- dplyr::select(count_4, gene_id, LC_C2)
+count_4$gene_id <- substring(count_4$gene_id, 1, 15)
+
+count_5 <- read.table("LC_C3_nor_feature_counts", header=TRUE) 
+colnames(count_5)[c(1, 7)] <- c("gene_id", "LC_C3_nor")
+count_5 <- dplyr::select(count_5, gene_id, LC_C3_nor)
+count_5$gene_id <- substring(count_5$gene_id, 1, 15)
+
+count_6 <- read.table("LC_C3_feature_counts", header=TRUE) 
+colnames(count_6)[c(1, 7)] <- c("gene_id", "LC_C3")
+count_6 <- dplyr::select(count_6, gene_id, LC_C3)
+count_6$gene_id <- substring(count_6$gene_id, 1, 15)
+
+count_7 <- read.table("LC_C5_nor_feature_counts", header=TRUE) 
+colnames(count_7)[c(1, 7)] <- c("gene_id", "LC_C5_nor")
+count_7 <- dplyr::select(count_7, gene_id, LC_C5_nor)
+count_7$gene_id <- substring(count_7$gene_id, 1, 15)
+
+count_8 <- read.table("LC_C5_feature_counts", header=TRUE) 
+colnames(count_8)[c(1, 7)] <- c("gene_id", "LC_C5")
+count_8 <- dplyr::select(count_8, gene_id, LC_C5)
+count_8$gene_id <- substring(count_8$gene_id, 1, 15)
+
+# You can also create a function to do this if you have a large amount of files 
+
+```
+
+```{r}
+
+### Join all gene count files into one data frame
+feature_counts <- join_all(list(count_1, count_3, count_5, count_7, count_2, count_4, 
+                       count_6, count_8), by = "gene_id", type = "full")
+# Write out table for later analysis
+write.table(feature_counts, file = "feature_counts.txt", quote=FALSE, sep='\t', row.names = FALSE)
 
 ```
 
 
 ---
 
+```{r}
+
+# Read in feature counts 
+deseq_counts <- read.table("feature_counts.txt", header=TRUE, row.names=1) 
+as.tibble(deseq_counts)
+
+# Create DeSeq dataset 
+samples <- data.frame(row.names = c("LC_C1_nor", "LC_C2_nor", "LC_C3_nor", "LC_C5_nor",
+                                    "LC_C1", "LC_C2", "LC_C3", "LC_C5"),
+                      sample = as.factor(c(rep("normal", 4), 
+                                           rep("tumor", 4))))
+deseq_df <- DESeqDataSetFromMatrix(countData = deseq_counts, colData = samples, 
+                                   design = ~ sample)
+
+# Remove genes that do not have counts greater than 2 in at least 2 of the datasets (columns)
+deseq_df <- deseq_df[rowSums(counts(deseq_df) >= 2) >= 2] 
+
+# Confirm that all samples are labelled correctly 
+as.data.frame(colData(deseq_df))
+
+```
+
+```{r}
+
+### Exploratory data analysis of DESeq matrix with transformation 
+
+# Estimate size factors
+# The size factor is the median ratio of the sample over a pseudosample: for each gene, the geometric mean of all samples
+deseq_eda <- estimateSizeFactors(deseq_df)
+
+# Apply regularized-logarithm transformation
+rld <- rlog(deseq_eda, blind = FALSE)
+
+# Apply variance stabilizing transformation
+vsd <- vst(deseq_eda, blind = FALSE)
+
+# Create new data frame three normalization methods for all samples
+deseq_eda <- bind_rows(
+  as_data_frame(log2(counts(deseq_eda, normalized=TRUE)[, (1:8)])) %>%
+         mutate(transform = "log2(x + 1)"),
+  as_data_frame(assay(vsd)[, (1:8)]) %>% mutate(transform = "vst"),
+  as_data_frame(assay(rld)[, (1:8)]) %>% mutate(transform = "rlog"))
+  
+# Compare transformation visually 
+ggplot(deseq_eda, aes(x = LC_C1, y = LC_C1_nor)) + 
+  geom_bin2d(bins = 40) +
+  coord_fixed() + 
+  facet_grid( . ~ transform) +
+  scale_fill_continuous(limits = c(0, 2000), breaks = seq(0, 2000, by = 500)) +
+  ggtitle("LC_C1 vs. LC_C1_nor") + theme(plot.title = element_text(hjust = 0.5)) 
+
+ggplot(deseq_eda, aes(x = LC_C1, y = LC_C2)) + 
+  geom_bin2d(bins = 40) +
+  coord_fixed() + 
+  facet_grid( . ~ transform) +
+  scale_fill_continuous(limits = c(0, 2000), breaks = seq(0, 2000, by = 500)) +
+  ggtitle("LC_C1 vs. LC_C2") + theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(deseq_eda, aes(x = LC_C1_nor, y = LC_C2_nor)) + 
+  geom_bin2d(bins = 40) +
+  coord_fixed() + 
+  facet_grid( . ~ transform) +
+  scale_fill_continuous(limits = c(0, 2000), breaks = seq(0, 2000, by = 500)) +
+  ggtitle("LC_C1_nor vs. LC_C2_nor") + theme(plot.title = element_text(hjust = 0.5))
+
+
+```
+
+```{r}
+
+### Exploratory data analysis of DESeq matrix with sample comparison 
+# This will asses overall similarity between samples
+# As shown in the above plots this similarity might not be as expected
+
+# Calculate the euclidean distance between samples
+deseq_distance <- dist(t(assay(rld)))
+deseq_distance
+
+# Create annotation for the heatmap
+deseq_annotation <- as.data.frame(as.factor(c(rep("normal", 4), 
+                                              rep("tumor", 4))))
+colnames(deseq_annotation)[1] <- c("sample")
+deseq_ha <- HeatmapAnnotation(df = deseq_annotation, 
+                              col = list(sample = c("normal" = "darkred", 
+                                                    "tumor" = "darkblue")))
+
+# Make dataframe a matrix for heatmpap
+deseq_heatmap <- as.matrix(deseq_distance)
+
+# Visualize with heatmap 
+deseq_heat <- Heatmap(deseq_heatmap,
+                   top_annotation = deseq_ha,
+                   show_column_names = F, 
+                   show_row_names = T,
+                   cluster_rows = T,
+                   cluster_columns = T,
+                   clustering_method_columns = 'complete',
+                   clustering_method_rows = "complete",
+                   row_names_gp = gpar(fontsize = 8),
+                   top_annotation_height = unit(1, "cm"),
+                   heatmap_legend_param = list(title = "Distance"),
+                   col = colorRamp2(c(0, 75), c("darkorchid4", "white")))
+
+deseq_heat
+
+```
+
+```{r}
+
+### Compare with PCA 
+# visualize screeplot and autoplotted pca for reference 
+deseq_pca <-prcomp(t(assay(rld)))
+screeplot(deseq_pca, type='lines')
+autoplot(deseq_pca)
+
+# Create PCA object to be plotted with ggplot
+plot_pca <- plotPCA(rld, intgroup = c("sample"), returnData = TRUE)
+
+# Calculate and round variance for plotting
+percentVar <- round(100 * attr(plot_pca, "percentVar"))
+
+# Plot PCA           
+deseq_pca_1 <- ggplot(plot_pca, aes(x = PC1, y = PC2, color = sample)) +
+  geom_point(size = 2.5) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  coord_fixed() +
+  scale_color_manual(values = c("darkred", "darkblue")) + 
+  ggtitle("DESeq2 PCA: Not Batch Corrected") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+deseq_pca_1
+
+```
+
+
+```{r}
+
+# Make sure that normal is the first level in the sample factor
+# This is to ensure the log2 fold change is calculated over the control (when results are called at random)
+deseq_df$sample <- relevel(deseq_df$sample, "normal")
+
+# Check to insure all samples are correct 
+as.data.frame(colData(deseq_df))
+
+# Run the DESeq analysis against raw counts 
+deseq_analysis <- DESeq(deseq_df)
+results(deseq_analysis)
+
+# Call results
+deseq_results <- results(deseq_analysis, contrast = c("sample", "normal", "tumor"))
+deseq_results
+
+# Review Comparisons 
+mcols(deseq_results, use.names = TRUE)
+
+### Review Summary
+summary(deseq_results, alpha = 0.01)
+
+```
+
+```{r}
+
+### Plot p-values for distribution check 
+
+# Calculate row means across samples 
+mean_norm <-  rowMeans(counts(deseq_analysis, normalized=TRUE)[, deseq_analysis$sample == "normal"])
+mea_tumor <-  rowMeans(counts(deseq_analysis, normalized=TRUE)[, deseq_analysis$sample == "tumor"])
+
+### Control 1 vs. expression
+# Log Fold change
+lfc_comp <- lfcShrink(deseq_analysis, contrast = c("sample", "normal", "tumor"))
+
+# add row names to log fold change data frame 
+lfc_comp <-  cbind(as.data.frame(lfc_comp), mean_norm, mea_tumor)
+
+# Map gene names and ids
+lfc_comp$symbol <- mapIds(org.Hs.eg.db, keys=row.names(lfc_comp), 
+                             column="SYMBOL", keytype="ENSEMBL", multiVals="first")
+lfc_comp$entrez <- mapIds(org.Hs.eg.db, keys=row.names(lfc_comp), 
+                             column="ENTREZID", keytype="ENSEMBL", multiVals="first")
+
+# Plot histogram to review distribution
+ggplot(data = lfc_comp, mapping = aes(x = pvalue)) + geom_histogram(binwidth = 0.01)
+ggplot(data = lfc_comp, mapping = aes(x = padj)) + geom_histogram(binwidth = 0.01)
+
+```
+
+```{r}
+
+#### Volcano Plots
+
+# Create up, none, down labels for color then plot
+
+# Control 1 vs. Expression
+lfc_comp <- lfc_comp %>%
+  mutate(threshold = ifelse((log2FoldChange >= 0 & padj < 0.01), "up_sig",
+                            ifelse((log2FoldChange <= 0 & padj < 0.01) , 
+                                   "down_sig", "not_sig")))
+lfc_comp$threshold[is.na(lfc_comp$threshold)] <- "not_sig"
+
+des_vol <- ggplot(lfc_comp, aes(x = log2FoldChange, y = -log10(pvalue))) +
+  geom_point(aes(colour = threshold), size=1) +
+  ggtitle("Control 1 vs. Expression with DESeq2") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylim(0,50) + xlim(-6,6) +
+  scale_colour_manual(values=c("blue", "grey", "red3"), 
+                       name="Threshold 0.01",
+                       breaks=c("down_sig", "not_sig", "up_sig"),
+                       labels=c("Down", "None", "Up"))
+
+des_vol
+
+```
+
+```{r}
+
+#### Heatmaps with top variable genes
+
+# Normal vs. Tumor 
+# Transform with regularized log
+rld <- rlog(deseq_analysis)
+assay(rld)
+
+# Order genes then filter for the top 25
+top_genes <- head(order(rowMeans(assay(rld)), decreasing = TRUE), 30)
+as.tibble(top_genes)
+deseq_genes <- assay(rld)[top_genes, ]
+
+# Calculate distances from the mean for clearer heatmap
+deseq_genes <- (deseq_genes - rowMeans(deseq_genes))
+
+# Connect to ensemble database and label gene ids with gene symbol
+mart <- useMart("ENSEMBL_MART_ENSEMBL","hsapiens_gene_ensembl") 
+gene_symbol <- getBM(c("hgnc_symbol","ensembl_gene_id"), "ensembl_gene_id", row.names(deseq_genes), mart)
+
+row.names(deseq_genes)[match(gene_symbol[,2], row.names(deseq_genes))] <- gene_symbol[,1]
+
+as.tibble(deseq_genes)
+
+# Create Annotation
+sample_annotation <- as.data.frame(colData(rld)[, c("sample")])
+colnames(sample_annotation)[1] <- "Sample"
+sample_ha <- HeatmapAnnotation(df = sample_annotation,
+                               col = list(Sample = c("normal" = "darkred", 
+                                                     "tumor" = "darkblue")))
+
+# Create Heatmap 
+deseq_heat <- Heatmap(deseq_genes,
+                   top_annotation = sample_ha,
+                   show_column_names = F, 
+                   show_row_names = T,
+                   cluster_rows = T,
+                   cluster_columns = T,
+                   clustering_method_columns = 'complete',
+                   clustering_method_rows = "complete",
+                   row_names_gp = gpar(fontsize = 8),
+                   top_annotation_height = unit(1, "cm"),
+                   heatmap_legend_param = list(title = "Distance"),
+                   col = colorRamp2(c(-1, 0, 1), c("red3", "white", "blue")),
+                   column_title = "DESeq2 Control vs. Expression: Not Batch Corrected")
+
+deseq_heat
+
+```
+
+```{r}
+
+# Add column for upregulated vs. downregulated 
+lfc_comp$expression <- NA
+lfc_comp$expression[lfc_comp$log2FoldChange > 0 ] <- "up"
+lfc_comp$expression[lfc_comp$log2FoldChange < 0 ] <- "down"
+setDT(lfc_comp, keep.rownames = TRUE)[]
+colnames(lfc_comp)[1] <- "gene_id"
+as.tibble(lfc_comp)
+
+# Filter out columns for significantly upregulated and downregulated genes
+lfc_comp_final <- dplyr::select(lfc_comp, gene_id, symbol, log2FoldChange, padj, expression)
+lfc_comp_final <- filter(lfc_comp_final, padj < 0.01)
+lfc_comp_final <- lfc_comp_final[order(lfc_comp_final$padj),]
+as.tibble(lfc_comp_final)
+
+```
+
+```{r}
+
+# Convert gene ids to gene symbol 
+mart <- useMart("ENSEMBL_MART_ENSEMBL","hsapiens_gene_ensembl") 
+gene_symbol <- getBM(c("hgnc_symbol","ensembl_gene_id"), "ensembl_gene_id", row.names(deseq_analysis), mart)
+
+row.names(deseq_analysis)[match(gene_symbol[,2], row.names(deseq_analysis))] <- gene_symbol[,1]
+
+### Filter and order dataframes 
+# State whether they are upregulated or downregulated 
+# Filter out columns for significantly upregulated and downregulated genes
+
+# Top 30 expressed genes (by p-value adjusted)
+top_30 <- as.data.frame(results(deseq_analysis))
+top_30 <- top_30[order(top_30$padj),]
+top_30 <- head(top_30, 30)
+setDT(top_30, keep.rownames = TRUE)[]
+colnames(top_30)[1] <- "genes"
+
+as.tibble(top_30)
+
+top_30$expression <- NA
+top_30$expression[top_30$log2FoldChange > 0 ] <- "up"
+top_30$expression[top_30$log2FoldChange < 0 ] <- "down"
+as.tibble(top_30)
+
+```
+
 
 ---
+
+```{r}
+
+sessionInfo()
+
+```
 
 
 ---
