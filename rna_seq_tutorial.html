@@ -217,88 +217,290 @@ $(document).ready(function () {
 </ol>
 <hr />
 <p>Login to the cluster and create a new directory for this tutorial This is where all of the files will be located:</p>
-<div id="mkdir-rna_seq_tutorial" class="section level2">
-<h2>mkdir rna_seq_tutorial</h2>
+<div id="mkdir-rna_seq_tutorial" class="section level4">
+<h4>mkdir rna_seq_tutorial</h4>
+<hr />
 <p>Open up a text editor in the new file (I use nano) and we will begin to write the first script</p>
 </div>
-<div id="cd-rna_seq_tutorial" class="section level2">
-<h2>cd rna_seq_tutorial</h2>
+<div id="cd-rna_seq_tutorial" class="section level4">
+<h4>cd rna_seq_tutorial</h4>
 </div>
-<div id="nano" class="section level2">
-<h2>nano</h2>
+<div id="nano" class="section level4">
+<h4>nano</h4>
+<hr />
 <p>Create a submitter script. This will submit you script for you and run the following tasks on each dataset in parallel.</p>
 <p>See submitter.txt in file (or below)</p>
 <hr />
-<p>#!/bin/bash #SBATCH –job-name=job_submitter ### name of job #SBATCH –nodes=1 ### number of nodes to run on #SBATCH –mem=200MB ### memory #SBATCH –time=1:00:00 ### time #SBATCH –error=job_sub_error.txt ### output error file #SBATCH –output=job_sub_stdout.txt ### output standard file</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140427 LC_C1 sbatch –array=1 rna_seq_script.sh ERX140428 LC_C2 sbatch –array=1 rna_seq_script.sh ERX140429 LC_C3 sbatch –array=1 rna_seq_script.sh ERX140431 LC_C5 sbatch –array=1 rna_seq_script.sh ERX140350 LC_C1_nor sbatch –array=1 rna_seq_script.sh ERX140351 LC_C2_nor sbatch –array=1 rna_seq_script.sh ERX140352 LC_C3_nor sbatch –array=1 rna_seq_script.sh ERX140353 LC_C5_nor</p>
+<p>#!/bin/bash</p>
+<p>#SBATCH –job-name=job_submitter ### name of job</p>
+<p>#SBATCH –nodes=1 ### number of nodes to run on</p>
+<p>#SBATCH –mem=200MB ### memory</p>
+<p>#SBATCH –time=1:00:00 ### time</p>
+<p>#SBATCH –error=job_sub_error.txt ### output error file</p>
+<p>#SBATCH –output=job_sub_stdout.txt ### output standard file</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140427 LC_C1</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140428 LC_C2</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140429 LC_C3</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140431 LC_C5</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140350 LC_C1_nor</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140351 LC_C2_nor</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140352 LC_C3_nor</p>
+<p>sbatch –array=1 rna_seq_script.sh ERX140353 LC_C5_nor</p>
 <p>Save this as submitter.sh</p>
 <hr />
 <p>Create a header for your rna script</p>
-<p>#!/bin/bash #SBATCH –job-name=rna_seq ### Job name #SBATCH –mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL) #SBATCH –<a href="mailto:mail-user=name.last@school.org">mail-user=name.last@school.org</a> ### Where to send mail #SBATCH –ntasks=4 ### Run on a 4 CPU #SBATCH –mem=64gb ### Job memory request #SBATCH –time=12:00:00 ### Time limit hrs:min:sec #SBATCH –output=./rna_seq_%j.log ### Standard output and error log #SBATCH -p cpu_short ### Node</p>
+<p>#!/bin/bash #SBATCH –job-name=rna_seq ### Job name</p>
+<p>#SBATCH –mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL)</p>
+<p>#SBATCH –<a href="mailto:mail-user=name.last@school.org">mail-user=name.last@school.org</a> ### Where to send mail</p>
+<p>#SBATCH –ntasks=4 ### Run on a 4 CPU</p>
+<p>#SBATCH –mem=64gb ### Job memory request #SBATCH –time=12:00:00 ### Time limit hrs:min:sec #SBATCH –output=./rna_seq_%j.log ### Standard output and error log #SBATCH -p cpu_short ### Node</p>
 <hr />
-<p>Download the Human Genome (hg38) ## wget <a href="ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz" class="uri">ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz</a> ## tar -zxvf Homo_sapiens_UCSC_hg38.tar.gz</p>
 <hr />
-<p>Import modules ## module load sratoolkit/2.9.1 ## module load fastqc/0.11.7 ## module load trimgalore/0.5.0 ## module load python/cpu/2.7.15-ES ###### CutAdapt is hidden in here ## module load bbmap/38.25 ## module load samtools/1.9 ## module load subread/1.6.3</p>
+<p>Download the Human Genome (hg38)</p>
+</div>
+<div id="wget-ftpigenomeg3nom3s4uussd-ftp.illumina.comhomo_sapiensucschg38homo_sapiens_ucsc_hg38.tar.gz" class="section level4">
+<h4>wget <a href="ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz" class="uri">ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz</a></h4>
+</div>
+<div id="tar--zxvf-homo_sapiens_ucsc_hg38.tar.gz" class="section level4">
+<h4>tar -zxvf Homo_sapiens_UCSC_hg38.tar.gz</h4>
 <hr />
-<p>Download Data from the SRA ## fastq-dump ${1} –split-files –gzip -O ./</p>
-<p>Remove fastq-dump directory ## rm -r ~/ncbi</p>
-<p>Rename files ## mv ./<span class="math inline">\({1}_1*fastq.gz ./\)</span>{2}_1.fastq.gz ## mv ./<span class="math inline">\({1}_2*fastq.gz ./\)</span>{2}_2.fastq.gz</p>
 <hr />
-<p>Trim and run FASTQC ## trim_galore –q 30<br />
-## –phred33<br />
-## -o ./<br />
-## –paired<br />
-## –fastqc<br />
-## ./<span class="math inline">\({2}_1.fastq.gz \
-## ./\)</span>{2}_2.fastq.gz</p>
+<p>Import modules</p>
+</div>
+<div id="module-load-sratoolkit2.9.1" class="section level4">
+<h4>module load sratoolkit/2.9.1</h4>
+</div>
+<div id="module-load-fastqc0.11.7" class="section level4">
+<h4>module load fastqc/0.11.7</h4>
+</div>
+<div id="module-load-trimgalore0.5.0" class="section level4">
+<h4>module load trimgalore/0.5.0</h4>
+</div>
+<div id="module-load-pythoncpu2.7.15-es-cutadapt-is-hidden-in-here" class="section level4">
+<h4>module load python/cpu/2.7.15-ES ## CutAdapt is hidden in here</h4>
+</div>
+<div id="module-load-bbmap38.25" class="section level4">
+<h4>module load bbmap/38.25</h4>
+</div>
+<div id="module-load-samtools1.9" class="section level4">
+<h4>module load samtools/1.9</h4>
+</div>
+<div id="module-load-subread1.6.3" class="section level4">
+<h4>module load subread/1.6.3</h4>
 <hr />
-<p>Align reads to reference genome ## bbmap.sh<br />
-## -Xmx26G<br />
-## ref=./Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa<br />
-## in=./<span class="math inline">\({2}_val_1.fq.gz in2=./\)</span>{2}_val_2.fq.gz<br />
-## outm=./${2}.sam<br />
-## minid=0.90<br />
-## ambiguous=random<br />
-## nodisk<br />
-—</p>
-<p>Convert SAM file to BAM file and sort ## samtools view -S -b ${2}.sam &gt; ${2}..bam ## samtools sort ${2}.bam -o ${2}_sorted.bam</p>
+<hr />
+<p>Download Data from the SRA</p>
+</div>
+<div id="fastq-dump-1-split-files-gzip--o-." class="section level4">
+<h4>fastq-dump ${1} –split-files –gzip -O ./</h4>
+<hr />
+<p>Remove fastq-dump directory</p>
+</div>
+<div id="rm--r-ncbi" class="section level4">
+<h4>rm -r ~/ncbi</h4>
+<hr />
+<p>Rename files</p>
+</div>
+<div id="mv-.1-_1.fastq.gz-.2_1.fastq.gz" class="section level4">
+<h4>mv ./<span class="math inline">\({1} _1.fastq.gz ./\)</span>{2}_1.fastq.gz</h4>
+</div>
+<div id="mv-.1-_2.fastq.gz-.2_2.fastq.gz" class="section level4">
+<h4>mv ./<span class="math inline">\({1} _2.fastq.gz ./\)</span>{2}_2.fastq.gz</h4>
+<hr />
+<hr />
+<p>Trim and run FASTQC</p>
+</div>
+<div id="trim_galore-q-30-phred33--o-.-paired-fastqc-.2_1.fastq.gz-.2_2.fastq.gz" class="section level4">
+<h4>trim_galore –q 30 –phred33 -o ./ –paired –fastqc ./<span class="math inline">\({2}_1.fastq.gz ./\)</span>{2}_2.fastq.gz</h4>
+<hr />
+<hr />
+<p>Align reads to reference genome</p>
+</div>
+<div id="bbmap.sh--xmx26g-ref.homo_sapiensucschg38sequencewholegenomefastagenome.fa-in.2_val_1.fq.gz-in2.2_val_2.fq.gz-outm.2.sam-minid0.90-ambiguousrandom-nodisk" class="section level4">
+<h4>bbmap.sh -Xmx26G ref=./Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa in=./<span class="math inline">\({2}_val_1.fq.gz in2=./\)</span>{2}_val_2.fq.gz outm=./${2}.sam minid=0.90 ambiguous=random nodisk</h4>
+<hr />
+<hr />
+<p>Convert SAM file to BAM file and sort</p>
+</div>
+<div id="samtools-view--s--b-2.sam-2.bam" class="section level4">
+<h4>samtools view -S -b ${2}.sam &gt; ${2}.bam</h4>
+</div>
+<div id="samtools-sort-2.bam--o-2_sorted.bam" class="section level4">
+<h4>samtools sort ${2}.bam -o ${2}_sorted.bam</h4>
+<hr />
 <hr />
 <p>There is a large variety of flags that can be used for feature counts. In this case we will be more stringent with the following parameters.</p>
 <p>The input is specified as reversely stranded (-s 2) and paired end (-p). The fragment length is checked (-P) and only the fragments that have both ends successfully aligned are counted (-B). Chimeric fragments are ignored (-C) as are duplicates (–ignoreDup). Finally, only primary alignments are counted (–primary) and the counts are based on gene_id (-g).</p>
 <hr />
-<p>Create a feature counts matrix ## featureCounts -s 2 -p -B -C -P –ignoreDup –primary -a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o <span class="math inline">\({2}_feature_counts ./\)</span>{2}_sorted.bam</p>
+<hr />
+<p>Create a feature counts matrix</p>
+</div>
+<div id="featurecounts--s-2--p--b--c--p-ignoredup-primary--a-.homo_sapiensucschg38annotationgenes.gencodegenes.gtf--g-gene_id--o-2_feature_counts-.2_sorted.bam" class="section level4">
+<h4>featureCounts -s 2 -p -B -C -P<br />
+#### –ignoreDup<br />
+#### –primary<br />
+#### -a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf<br />
+#### -g gene_id<br />
+#### -o <span class="math inline">\({2}_feature_counts \
+#### ./\)</span>{2}_sorted.bam</h4>
+<hr />
 <hr />
 <p>The final script should look like this:</p>
-<p>#!/bin/bash #SBATCH –job-name=rna_seq ### Job name #SBATCH –mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL) #SBATCH –<a href="mailto:mail-user=name.last@school.org">mail-user=name.last@school.org</a> ### Where to send mail #SBATCH –ntasks=4 ### Run on a 4 CPU #SBATCH –mem=64gb ### Job memory request #SBATCH –time=12:00:00 ### Time limit hrs:min:sec #SBATCH –output=./rna_seq_%j.log ### Standard output and error log #SBATCH -p cpu_short ### Node</p>
-<p>Download the Human Genome (hg38) ## wget <a href="ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz" class="uri">ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz</a> ## tar -zxvf Homo_sapiens_UCSC_hg38.tar.gz</p>
-<p>Import modules ## module load sratoolkit/2.9.1 ## module load fastqc/0.11.7 ## module load trimgalore/0.5.0 ## module load python/cpu/2.7.15-ES ###### CutAdapt is hidden in here ## module load bbmap/38.25 ## module load samtools/1.9 ## module load subread/1.6.3</p>
-<p>Download Data from the SRA ## fastq-dump ${1} –split-files –gzip -O ./</p>
-<p>Remove fastq-dump directory ## rm -r ~/ncbi</p>
-<p>Rename files ## mv ./<span class="math inline">\({1}_1*fastq.gz ./\)</span>{2}_1.fastq.gz ## mv ./<span class="math inline">\({1}_2*fastq.gz ./\)</span>{2}_2.fastq.gz</p>
-<p>Trim and run FASTQC ## trim_galore –q 30<br />
-## –phred33<br />
-## -o ./<br />
-## –paired<br />
-## –fastqc<br />
-## ./<span class="math inline">\({2}_1.fastq.gz \
-## ./\)</span>{2}_2.fastq.gz</p>
-<p>Align reads to reference genome ## bbmap.sh<br />
-## -Xmx26G<br />
-## ref=./hg38/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa<br />
-## in=./<span class="math inline">\({2}_val_1.fq.gz in2=./\)</span>{2}_val_2.fq.gz<br />
-## outm=./${2}.sam<br />
-## minid=0.90<br />
-## ambiguous=random<br />
-## nodisk<br />
-Convert SAM file to BAM file and sort ## samtools view -S -b ${2}.sam &gt; ${2}..bam ## samtools sort ${2}.bam -o ${2}_sorted.bam</p>
-<p>Create a feature counts matrix ## featureCounts -s 2 -p -B -C -P –ignoreDup –primary -a ./hg38/Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o <span class="math inline">\({2}_feature_counts ./\)</span>{2}_sorted.bam</p>
+<p>#!/bin/bash #SBATCH –job-name=rna_seq ### Job name</p>
+<p>#SBATCH –mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL)</p>
+<p>#SBATCH –<a href="mailto:mail-user=name.last@school.org">mail-user=name.last@school.org</a> ### Where to send mail</p>
+<p>#SBATCH –ntasks=4 ### Run on a 4 CPU</p>
+<p>#SBATCH –mem=64gb ### Job memory request</p>
+<p>#SBATCH –time=12:00:00 ### Time limit hrs:min:sec</p>
+<p>#SBATCH –output=./rna_seq_%j.log ### Standard output and error log</p>
+<p>#SBATCH -p cpu_short ### Node</p>
+<p>Download the Human Genome (hg38)</p>
+</div>
+<div id="wget-ftpigenomeg3nom3s4uussd-ftp.illumina.comhomo_sapiensucschg38homo_sapiens_ucsc_hg38.tar.gz-1" class="section level4">
+<h4>wget <a href="ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz" class="uri">ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz</a></h4>
+</div>
+<div id="tar--zxvf-homo_sapiens_ucsc_hg38.tar.gz-1" class="section level4">
+<h4>tar -zxvf Homo_sapiens_UCSC_hg38.tar.gz</h4>
+<p>Import modules</p>
+</div>
+<div id="module-load-sratoolkit2.9.1-1" class="section level4">
+<h4>module load sratoolkit/2.9.1</h4>
+</div>
+<div id="module-load-fastqc0.11.7-1" class="section level4">
+<h4>module load fastqc/0.11.7</h4>
+</div>
+<div id="module-load-trimgalore0.5.0-1" class="section level4">
+<h4>module load trimgalore/0.5.0</h4>
+</div>
+<div id="module-load-pythoncpu2.7.15-es-cutadapt-is-hidden-in-here-1" class="section level4">
+<h4>module load python/cpu/2.7.15-ES ## CutAdapt is hidden in here</h4>
+</div>
+<div id="module-load-bbmap38.25-1" class="section level4">
+<h4>module load bbmap/38.25</h4>
+</div>
+<div id="module-load-samtools1.9-1" class="section level4">
+<h4>module load samtools/1.9</h4>
+</div>
+<div id="module-load-subread1.6.3-1" class="section level4">
+<h4>module load subread/1.6.3</h4>
+<p>Download Data from the SRA</p>
+</div>
+<div id="fastq-dump-1-split-files-gzip--o-.-1" class="section level4">
+<h4>fastq-dump ${1} –split-files –gzip -O ./</h4>
+<p>Remove fastq-dump directory</p>
+</div>
+<div id="rm--r-ncbi-1" class="section level4">
+<h4>rm -r ~/ncbi</h4>
+<p>Rename files</p>
+</div>
+<div id="mv-.1_1.fastq.gz-.2_1.fastq.gz" class="section level4">
+<h4>mv ./<span class="math inline">\({1}_1.fastq.gz ./\)</span>{2}_1.fastq.gz</h4>
+</div>
+<div id="mv-.1_2.fastq.gz-.2_2.fastq.gz" class="section level4">
+<h4>mv ./<span class="math inline">\({1}_2.fastq.gz ./\)</span>{2}_2.fastq.gz</h4>
+<p>Trim and run FASTQC</p>
+</div>
+<div id="trim_galore-q-30" class="section level4">
+<h4>trim_galore –q 30<br />
+</h4>
+</div>
+<div id="phred33" class="section level4">
+<h4>–phred33<br />
+</h4>
+</div>
+<div id="o-." class="section level4">
+<h4>-o ./<br />
+</h4>
+</div>
+<div id="paired" class="section level4">
+<h4>–paired<br />
+</h4>
+</div>
+<div id="fastqc" class="section level4">
+<h4>–fastqc<br />
+</h4>
+</div>
+<div id="fastq.gz-.2_2.fastq.gz" class="section level4">
+<h4>./<span class="math inline">\({2}_1.fastq.gz \
+ #### ./\)</span>{2}_2.fastq.gz</h4>
+<p>Align reads to reference genome</p>
+</div>
+<div id="bbmap.sh" class="section level4">
+<h4>bbmap.sh<br />
+</h4>
+</div>
+<div id="xmx26g" class="section level4">
+<h4>-Xmx26G<br />
+</h4>
+</div>
+<div id="ref.hg38homo_sapiensucschg38sequencewholegenomefastagenome.fa" class="section level4">
+<h4>ref=./hg38/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa<br />
+</h4>
+</div>
+<div id="in.2_val_1.fq.gz-in2.2_val_2.fq.gz-outm.2.sam-minid0.90-ambiguousrandom-nodisk-convert-sam-file-to-bam-file-and-sort" class="section level4">
+<h4>in=./<span class="math inline">\({2}_val_1.fq.gz in2=./\)</span>{2}_val_2.fq.gz<br />
+#### outm=./${2}.sam<br />
+#### minid=0.90<br />
+#### ambiguous=random<br />
+#### nodisk<br />
+Convert SAM file to BAM file and sort</h4>
+</div>
+<div id="samtools-view--s--b-2.sam-2.bam-1" class="section level4">
+<h4>samtools view -S -b ${2}.sam &gt; ${2}.bam</h4>
+</div>
+<div id="samtools-sort-2.bam--o-2_sorted.bam-1" class="section level4">
+<h4>samtools sort ${2}.bam -o ${2}_sorted.bam</h4>
+<p>Create a feature counts matrix</p>
+</div>
+<div id="featurecounts--s-2--p--b--c--p" class="section level4">
+<h4>featureCounts -s 2 -p -B -C -P<br />
+</h4>
+</div>
+<div id="ignoredup" class="section level4">
+<h4>–ignoreDup<br />
+</h4>
+</div>
+<div id="primary" class="section level4">
+<h4>–primary<br />
+</h4>
+</div>
+<div id="a-.homo_sapiensucschg38annotationgenes.gencodegenes.gtf" class="section level4">
+<h4>-a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf<br />
+</h4>
+</div>
+<div id="g-gene_id" class="section level4">
+<h4>-g gene_id<br />
+</h4>
+</div>
+<div id="o-2_feature_counts-.2_sorted.bam" class="section level4">
+<h4>-o <span class="math inline">\({2}_feature_counts \
+ #### ./\)</span>{2}_sorted.bam</h4>
+<hr />
 <hr />
 <p>Save the script as rna_seq_script.sh</p>
 <hr />
-<p>To run your submitter (this will submit all 8 scripts, one for each dataset) ## ./submitter.sh</p>
+<p>To run your submitter (this will submit all 8 scripts, one for each dataset)</p>
+</div>
+<div id="submitter.sh" class="section level2">
+<h2>./submitter.sh</h2>
 <hr />
 <p>Check the output. It should include these files for each dataset:</p>
-<p>LC_C1_1.fastq.gz LC_C1_1.fastq.gz_trimming_report.txt LC_C1_1_val_1_fastqc.html LC_C1_1_val_1_fastqc.zip LC_C1_1_val_1.fq.gz LC_C1_2.fastq.gz LC_C1_2.fastq.gz_trimming_report.txt LC_C1_2_val_2_fastqc.html LC_C1_2_val_2_fastqc.zip LC_C1_2_val_2.fq.gz LC_C1.bam LC_C1_feature_counts LC_C1_feature_counts.summary</p>
+<ol style="list-style-type: decimal">
+<li>LC_C1_1.fastq.gz</li>
+<li>LC_C1_1.fastq.gz_trimming_report.txt</li>
+<li>LC_C1_1_val_1_fastqc.html</li>
+<li>LC_C1_1_val_1_fastqc.zip</li>
+<li>LC_C1_1_val_1.fq.gz</li>
+<li>LC_C1_2.fastq.gz</li>
+<li>LC_C1_2.fastq.gz_trimming_report.txt</li>
+<li>LC_C1_2_val_2_fastqc.html</li>
+<li>LC_C1_2_val_2_fastqc.zip</li>
+<li>LC_C1_2_val_2.fq.gz</li>
+<li>LC_C1.bam</li>
+<li>LC_C1_feature_counts</li>
+<li>LC_C1_feature_counts.summary</li>
+</ol>
+<hr />
 <p>Copy the feature counts files to your local directory. You can do this using a command or an application like FileZilla.</p>
 <hr />
 <hr />
@@ -314,194 +516,6 @@ Convert SAM file to BAM file and sort ## samtools view -S -b ${2}.sam &gt; ${2}.
 <li>Difference gene expression analysis</li>
 </ol>
 <hr />
-<pre class="r"><code># Load Libraries
-library(tidyverse)</code></pre>
-<pre><code>## ── Attaching packages ─────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
-<pre><code>## ✔ ggplot2 3.1.1       ✔ purrr   0.3.2  
-## ✔ tibble  2.1.1       ✔ dplyr   0.8.0.1
-## ✔ tidyr   0.8.3       ✔ stringr 1.4.0  
-## ✔ readr   1.3.1       ✔ forcats 0.4.0</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(plyr)</code></pre>
-<pre><code>## -------------------------------------------------------------------------</code></pre>
-<pre><code>## You have loaded plyr after dplyr - this is likely to cause problems.
-## If you need functions from both plyr and dplyr, please load plyr first, then dplyr:
-## library(plyr); library(dplyr)</code></pre>
-<pre><code>## -------------------------------------------------------------------------</code></pre>
-<pre><code>## 
-## Attaching package: 'plyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:dplyr':
-## 
-##     arrange, count, desc, failwith, id, mutate, rename, summarise,
-##     summarize</code></pre>
-<pre><code>## The following object is masked from 'package:purrr':
-## 
-##     compact</code></pre>
-<pre class="r"><code>library(dplyr)
-library(DESeq2)</code></pre>
-<pre><code>## Loading required package: S4Vectors</code></pre>
-<pre><code>## Loading required package: stats4</code></pre>
-<pre><code>## Loading required package: BiocGenerics</code></pre>
-<pre><code>## Loading required package: parallel</code></pre>
-<pre><code>## 
-## Attaching package: 'BiocGenerics'</code></pre>
-<pre><code>## The following objects are masked from 'package:parallel':
-## 
-##     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
-##     clusterExport, clusterMap, parApply, parCapply, parLapply,
-##     parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
-<pre><code>## The following objects are masked from 'package:dplyr':
-## 
-##     combine, intersect, setdiff, union</code></pre>
-<pre><code>## The following objects are masked from 'package:stats':
-## 
-##     IQR, mad, sd, var, xtabs</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     anyDuplicated, append, as.data.frame, basename, cbind,
-##     colMeans, colnames, colSums, dirname, do.call, duplicated,
-##     eval, evalq, Filter, Find, get, grep, grepl, intersect,
-##     is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
-##     paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
-##     Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
-##     table, tapply, union, unique, unsplit, which, which.max,
-##     which.min</code></pre>
-<pre><code>## 
-## Attaching package: 'S4Vectors'</code></pre>
-<pre><code>## The following object is masked from 'package:plyr':
-## 
-##     rename</code></pre>
-<pre><code>## The following objects are masked from 'package:dplyr':
-## 
-##     first, rename</code></pre>
-<pre><code>## The following object is masked from 'package:tidyr':
-## 
-##     expand</code></pre>
-<pre><code>## The following object is masked from 'package:base':
-## 
-##     expand.grid</code></pre>
-<pre><code>## Loading required package: IRanges</code></pre>
-<pre><code>## 
-## Attaching package: 'IRanges'</code></pre>
-<pre><code>## The following object is masked from 'package:plyr':
-## 
-##     desc</code></pre>
-<pre><code>## The following objects are masked from 'package:dplyr':
-## 
-##     collapse, desc, slice</code></pre>
-<pre><code>## The following object is masked from 'package:purrr':
-## 
-##     reduce</code></pre>
-<pre><code>## Loading required package: GenomicRanges</code></pre>
-<pre><code>## Loading required package: GenomeInfoDb</code></pre>
-<pre><code>## Loading required package: SummarizedExperiment</code></pre>
-<pre><code>## Loading required package: Biobase</code></pre>
-<pre><code>## Welcome to Bioconductor
-## 
-##     Vignettes contain introductory material; view with
-##     'browseVignettes()'. To cite Bioconductor, see
-##     'citation(&quot;Biobase&quot;)', and for packages 'citation(&quot;pkgname&quot;)'.</code></pre>
-<pre><code>## Loading required package: DelayedArray</code></pre>
-<pre><code>## Loading required package: matrixStats</code></pre>
-<pre><code>## 
-## Attaching package: 'matrixStats'</code></pre>
-<pre><code>## The following objects are masked from 'package:Biobase':
-## 
-##     anyMissing, rowMedians</code></pre>
-<pre><code>## The following object is masked from 'package:plyr':
-## 
-##     count</code></pre>
-<pre><code>## The following object is masked from 'package:dplyr':
-## 
-##     count</code></pre>
-<pre><code>## Loading required package: BiocParallel</code></pre>
-<pre><code>## 
-## Attaching package: 'DelayedArray'</code></pre>
-<pre><code>## The following objects are masked from 'package:matrixStats':
-## 
-##     colMaxs, colMins, colRanges, rowMaxs, rowMins, rowRanges</code></pre>
-<pre><code>## The following object is masked from 'package:purrr':
-## 
-##     simplify</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     aperm, apply</code></pre>
-<pre class="r"><code>#library(purrr)
-library(ComplexHeatmap)</code></pre>
-<pre><code>## Loading required package: grid</code></pre>
-<pre><code>## ========================================
-## ComplexHeatmap version 1.20.0
-## Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
-## Github page: https://github.com/jokergoo/ComplexHeatmap
-## Documentation: http://bioconductor.org/packages/ComplexHeatmap/
-## 
-## If you use it in published research, please cite:
-## Gu, Z. Complex heatmaps reveal patterns and correlations in multidimensional 
-##   genomic data. Bioinformatics 2016.
-## ========================================</code></pre>
-<pre class="r"><code>library(circlize)</code></pre>
-<pre><code>## ========================================
-## circlize version 0.4.6
-## CRAN page: https://cran.r-project.org/package=circlize
-## Github page: https://github.com/jokergoo/circlize
-## Documentation: http://jokergoo.github.io/circlize_book/book/
-## 
-## If you use it in published research, please cite:
-## Gu, Z. circlize implements and enhances circular visualization 
-##   in R. Bioinformatics 2014.
-## ========================================</code></pre>
-<pre class="r"><code>library(ggplot2)
-library(ggfortify)
-#library(vsn)
-library(AnnotationDbi)</code></pre>
-<pre><code>## 
-## Attaching package: 'AnnotationDbi'</code></pre>
-<pre><code>## The following object is masked from 'package:dplyr':
-## 
-##     select</code></pre>
-<pre class="r"><code>library(org.Hs.eg.db)</code></pre>
-<pre><code>## </code></pre>
-<pre class="r"><code>library(genefilter)</code></pre>
-<pre><code>## 
-## Attaching package: 'genefilter'</code></pre>
-<pre><code>## The following object is masked from 'package:ComplexHeatmap':
-## 
-##     dist2</code></pre>
-<pre><code>## The following objects are masked from 'package:matrixStats':
-## 
-##     rowSds, rowVars</code></pre>
-<pre><code>## The following object is masked from 'package:readr':
-## 
-##     spec</code></pre>
-<pre class="r"><code>library(biomaRt)
-library(data.table)</code></pre>
-<pre><code>## 
-## Attaching package: 'data.table'</code></pre>
-<pre><code>## The following object is masked from 'package:SummarizedExperiment':
-## 
-##     shift</code></pre>
-<pre><code>## The following object is masked from 'package:GenomicRanges':
-## 
-##     shift</code></pre>
-<pre><code>## The following object is masked from 'package:IRanges':
-## 
-##     shift</code></pre>
-<pre><code>## The following objects are masked from 'package:S4Vectors':
-## 
-##     first, second</code></pre>
-<pre><code>## The following objects are masked from 'package:dplyr':
-## 
-##     between, first, last</code></pre>
-<pre><code>## The following object is masked from 'package:purrr':
-## 
-##     transpose</code></pre>
-<pre class="r"><code>#library(IHW)
-#library(VennDiagram)
-#library(gridExtra)
-
-# Not all of these are required - this depends on how you choose to visualize your results </code></pre>
 <pre class="r"><code>### Import &amp; clean gene count files
 
 count_1 &lt;- read.table(&quot;./data/LC_C1_nor_feature_counts&quot;, header=TRUE) 
@@ -1177,7 +1191,7 @@ as.tibble(top_30)</code></pre>
 ## [10] lubridate_1.7.4        xml2_1.2.0             splines_3.5.2         
 ## [13] geneplotter_1.60.0     knitr_1.22             Formula_1.2-3         
 ## [16] jsonlite_1.6           broom_0.5.2            annotate_1.60.1       
-## [19] cluster_2.0.8          compiler_3.5.2         httr_1.4.0            
+## [19] cluster_2.0.9          compiler_3.5.2         httr_1.4.0            
 ## [22] backports_1.1.4        assertthat_0.2.1       Matrix_1.2-17         
 ## [25] lazyeval_0.2.2         cli_1.1.0              prettyunits_1.0.2     
 ## [28] acepack_1.4.1          htmltools_0.3.6        tools_3.5.2           
@@ -1188,7 +1202,7 @@ as.tibble(top_30)</code></pre>
 ## [43] hms_0.4.2              RColorBrewer_1.1-2     curl_3.3              
 ## [46] yaml_2.2.0             memoise_1.1.0          gridExtra_2.3         
 ## [49] rpart_4.1-15           latticeExtra_0.6-28    stringi_1.4.3         
-## [52] RSQLite_2.1.1          checkmate_1.9.1        shape_1.4.4           
+## [52] RSQLite_2.1.1          checkmate_1.9.3        shape_1.4.4           
 ## [55] rlang_0.3.4            pkgconfig_2.0.2        bitops_1.0-6          
 ## [58] evaluate_0.13          lattice_0.20-38        labeling_0.3          
 ## [61] htmlwidgets_1.3        bit_1.1-14             tidyselect_0.2.5      
