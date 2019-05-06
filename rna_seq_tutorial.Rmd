@@ -63,19 +63,13 @@ See submitter.txt in file (or below)
 
 ---
 
-#### #!/bin/bash
- 
-#### #SBATCH --job-name=job_submitter      ### name of job
- 
-#### #SBATCH --nodes=1                     ### number of nodes to run on
- 
-#### #SBATCH --mem=200MB                   ### memory
- 
-#### #SBATCH --time=1:00:00                ### time 
- 
-#### #SBATCH --error=job_sub_error.txt     ### output error file
- 
-#### #SBATCH --output=job_sub_stdout.txt   ### output standard file
+#### #!/bin/bash  
+#### #SBATCH --job-name=job_submitter      ### name of job  
+#### #SBATCH --nodes=1                     ### number of nodes to run on  
+#### #SBATCH --mem=200MB                   ### memory  
+#### #SBATCH --time=1:00:00                ### time   
+#### #SBATCH --error=job_sub_error.txt     ### output error file  
+#### #SBATCH --output=job_sub_stdout.txt   ### output standard file  
  
  
 
@@ -165,9 +159,10 @@ Remove fastq-dump directory
 
 Rename files
 
-#### mv ./${1} _1.fastq.gz  ./${2}_1.fastq.gz
+#### mv ./ ${1}_1*fastq.gz     ./ ${2}_1.fastq.gz
 
-#### mv ./${1} _2.fastq.gz  ./${2}_2.fastq.gz
+
+#### mv ./ ${1}_2*fastq.gz     ./ ${2}_2.fastq.gz
 
 ---
 
@@ -176,7 +171,7 @@ Rename files
 
 Trim and run FASTQC
 
-#### trim_galore --q 30  --phred33  -o ./  --paired  --fastqc  ./${2}_1.fastq.gz  ./${2}_2.fastq.gz
+#### trim_galore --q 30  --phred33  -o ./  --paired  --fastqc  ./ ${2}_1.fastq.gz  ./ ${2}_2.fastq.gz
 
 ---
 
@@ -185,7 +180,8 @@ Trim and run FASTQC
 
 Align reads to reference genome
 
-#### bbmap.sh -Xmx26G ref=./Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa in=./${2}_val_1.fq.gz  in2=./${2}_val_2.fq.gz  outm=./${2}.sam  minid=0.90  ambiguous=random  nodisk 
+#### bbmap.sh -Xmx26G ref=./Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa 
+#### in= ./ ${2}_val_1.fq.gz  in2= ./ ${2}_val_2.fq.gz  outm= ./ ${2}.sam  minid=0.90  ambiguous=random  nodisk 
 
 ---
 
@@ -213,7 +209,7 @@ The input is specified as reversely stranded (-s 2) and paired end (-p). The fra
 
 Create a feature counts matrix
 
-#### featureCounts -s 2 -p -B -C -P  --ignoreDup  --primary  -a  ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf  -g gene_id  -o ${2}_feature_counts  ./${2}_sorted.bam
+#### featureCounts -s 2 -p -B -C -P  --ignoreDup  --primary  -a  ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf  -g gene_id  -o $ {2} -feature-counts   ./${2}_sorted.bam
 
 ---
 
@@ -234,7 +230,7 @@ The final script should look include all of these commands. See 'rna_seq_script.
 
 To run your submitter (this will submit all 8 scripts, one for each dataset)
 
-## ./submitter.sh
+#### ./submitter.sh
 
 ---
 
@@ -277,7 +273,7 @@ The general workflow is as follows:
 
 ---
 
-```{r include=FALSE}
+```{r message=FALSE}
 
 # Load Libraries
 library(tidyverse)
@@ -369,7 +365,7 @@ write.table(feature_counts, file = "feature_counts.txt", quote=FALSE, sep='\t', 
 
 # Read in feature counts 
 deseq_counts <- read.table("feature_counts.txt", header=TRUE, row.names=1) 
-as.tibble(deseq_counts)
+as_tibble(deseq_counts)
 
 # Create DeSeq dataset 
 samples <- data.frame(row.names = c("LC_C1_nor", "LC_C2_nor", "LC_C3_nor", "LC_C5_nor",
@@ -466,7 +462,7 @@ deseq_heat <- Heatmap(deseq_heatmap,
                    row_names_gp = gpar(fontsize = 8),
                    top_annotation_height = unit(1, "cm"),
                    heatmap_legend_param = list(title = "Distance"),
-                   col = colorRamp2(c(0, 75), c("darkorchid4", "white")))
+                   col = colorRamp2(c(0, 60), c("darkorchid4", "white")))
 
 deseq_heat
 
@@ -493,7 +489,7 @@ deseq_pca_1 <- ggplot(plot_pca, aes(x = PC1, y = PC2, color = sample)) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
   coord_fixed() +
   scale_color_manual(values = c("darkred", "darkblue")) + 
-  ggtitle("DESeq2 PCA: Not Batch Corrected") +
+  ggtitle("DESeq2 PCA") +
   theme(plot.title = element_text(hjust = 0.5))
 
 deseq_pca_1
@@ -534,7 +530,7 @@ summary(deseq_results, alpha = 0.01)
 mean_norm <-  rowMeans(counts(deseq_analysis, normalized=TRUE)[, deseq_analysis$sample == "normal"])
 mea_tumor <-  rowMeans(counts(deseq_analysis, normalized=TRUE)[, deseq_analysis$sample == "tumor"])
 
-### Control 1 vs. expression
+### Normal vs. Tumor
 # Log Fold change
 lfc_comp <- lfcShrink(deseq_analysis, contrast = c("sample", "normal", "tumor"))
 
@@ -568,7 +564,7 @@ lfc_comp$threshold[is.na(lfc_comp$threshold)] <- "not_sig"
 
 des_vol <- ggplot(lfc_comp, aes(x = log2FoldChange, y = -log10(pvalue))) +
   geom_point(aes(colour = threshold), size=1) +
-  ggtitle("Control 1 vs. Expression with DESeq2") + 
+  ggtitle("Normal vs. Tumor with DESeq2") + 
   theme(plot.title = element_text(hjust = 0.5)) +
   ylim(0,50) + xlim(-6,6) +
   scale_colour_manual(values=c("blue", "grey", "red3"), 
@@ -591,7 +587,7 @@ rld <- rlog(deseq_analysis)
 
 # Order genes then filter for the top 25
 top_genes <- head(order(rowMeans(assay(rld)), decreasing = TRUE), 30)
-as.tibble(top_genes)
+as_tibble(top_genes)
 deseq_genes <- assay(rld)[top_genes, ]
 
 # Calculate distances from the mean for clearer heatmap
@@ -603,7 +599,7 @@ gene_symbol <- getBM(c("hgnc_symbol","ensembl_gene_id"), "ensembl_gene_id", row.
 
 row.names(deseq_genes)[match(gene_symbol[,2], row.names(deseq_genes))] <- gene_symbol[,1]
 
-as.tibble(deseq_genes)
+as_tibble(deseq_genes)
 
 # Create Annotation
 sample_annotation <- as.data.frame(colData(rld)[, c("sample")])
@@ -625,7 +621,7 @@ deseq_heat <- Heatmap(deseq_genes,
                    top_annotation_height = unit(1, "cm"),
                    heatmap_legend_param = list(title = "Distance"),
                    col = colorRamp2(c(-1, 0, 1), c("red3", "white", "blue")),
-                   column_title = "DESeq2 Control vs. Expression: Not Batch Corrected")
+                   column_title = "DESeq2 Normal vs. Tumor")
 
 deseq_heat
 
@@ -668,12 +664,12 @@ top_30 <- head(top_30, 30)
 setDT(top_30, keep.rownames = TRUE)[]
 colnames(top_30)[1] <- "genes"
 
-as.tibble(top_30)
+as_tibble(top_30)
 
 top_30$expression <- NA
 top_30$expression[top_30$log2FoldChange > 0 ] <- "up"
 top_30$expression[top_30$log2FoldChange < 0 ] <- "down"
-as.tibble(top_30)
+as_tibble(top_30)
 
 ```
 
