@@ -216,7 +216,7 @@ $(document).ready(function () {
 <li>Create a feature counts matrix</li>
 </ol>
 <hr />
-<p>Login to the cluster and create a new directory for this tutorial This is where all of the files will be located:</p>
+<p>Login to the cluster and create a new directory for this tutorial. This is where all of the files will be located:</p>
 <div id="mkdir-rna_seq_tutorial" class="section level4">
 <h4>mkdir rna_seq_tutorial</h4>
 <hr />
@@ -231,29 +231,82 @@ $(document).ready(function () {
 <p>Create a submitter script. This will submit you script for you and run the following tasks on each dataset in parallel.</p>
 <p>See submitter.txt in file (or below)</p>
 <hr />
-<p>#!/bin/bash</p>
-<p>#SBATCH –job-name=job_submitter ### name of job</p>
-<p>#SBATCH –nodes=1 ### number of nodes to run on</p>
-<p>#SBATCH –mem=200MB ### memory</p>
-<p>#SBATCH –time=1:00:00 ### time</p>
-<p>#SBATCH –error=job_sub_error.txt ### output error file</p>
-<p>#SBATCH –output=job_sub_stdout.txt ### output standard file</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140427 LC_C1</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140428 LC_C2</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140429 LC_C3</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140431 LC_C5</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140350 LC_C1_nor</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140351 LC_C2_nor</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140352 LC_C3_nor</p>
-<p>sbatch –array=1 rna_seq_script.sh ERX140353 LC_C5_nor</p>
+</div>
+<div id="binbash" class="section level4">
+<h4>#!/bin/bash</h4>
+</div>
+<div id="sbatch-job-namejob_submitter-name-of-job" class="section level4">
+<h4>#SBATCH –job-name=job_submitter ### name of job</h4>
+</div>
+<div id="sbatch-nodes1-number-of-nodes-to-run-on" class="section level4">
+<h4>#SBATCH –nodes=1 ### number of nodes to run on</h4>
+</div>
+<div id="sbatch-mem200mb-memory" class="section level4">
+<h4>#SBATCH –mem=200MB ### memory</h4>
+</div>
+<div id="sbatch-time10000-time" class="section level4">
+<h4>#SBATCH –time=1:00:00 ### time</h4>
+</div>
+<div id="sbatch-errorjob_sub_error.txt-output-error-file" class="section level4">
+<h4>#SBATCH –error=job_sub_error.txt ### output error file</h4>
+</div>
+<div id="sbatch-outputjob_sub_stdout.txt-output-standard-file" class="section level4">
+<h4>#SBATCH –output=job_sub_stdout.txt ### output standard file</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140427-lc_c1" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140427 LC_C1</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140428-lc_c2" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140428 LC_C2</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140429-lc_c3" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140429 LC_C3</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140431-lc_c5" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140431 LC_C5</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140350-lc_c1_nor" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140350 LC_C1_nor</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140351-lc_c2_nor" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140351 LC_C2_nor</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140352-lc_c3_nor" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140352 LC_C3_nor</h4>
+</div>
+<div id="sbatch-array1-rna_seq_script.sh-erx140353-lc_c5_nor" class="section level4">
+<h4>sbatch –array=1 rna_seq_script.sh ERX140353 LC_C5_nor</h4>
+<hr />
 <p>Save this as submitter.sh</p>
 <hr />
-<p>Create a header for your rna script</p>
-<p>#!/bin/bash #SBATCH –job-name=rna_seq ### Job name</p>
-<p>#SBATCH –mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL)</p>
-<p>#SBATCH –<a href="mailto:mail-user=name.last@school.org">mail-user=name.last@school.org</a> ### Where to send mail</p>
-<p>#SBATCH –ntasks=4 ### Run on a 4 CPU</p>
-<p>#SBATCH –mem=64gb ### Job memory request #SBATCH –time=12:00:00 ### Time limit hrs:min:sec #SBATCH –output=./rna_seq_%j.log ### Standard output and error log #SBATCH -p cpu_short ### Node</p>
+<p>Open a new empty text file and treate a header for your rna script:</p>
+</div>
+<div id="binbash-1" class="section level4">
+<h4>#!/bin/bash</h4>
+</div>
+<div id="sbatch-job-namerna_seq-job-name" class="section level4">
+<h4>#SBATCH –job-name=rna_seq ### Job name</h4>
+</div>
+<div id="sbatch-mail-typeendfail-mail-events-none-begin-end-fail-all" class="section level4">
+<h4>#SBATCH –mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL)</h4>
+</div>
+<div id="sbatch-mail-username.lastschool.org-where-to-send-mail" class="section level4">
+<h4>#SBATCH –<a href="mailto:mail-user=name.last@school.org">mail-user=name.last@school.org</a> ### Where to send mail</h4>
+</div>
+<div id="sbatch-ntasks4-run-on-a-4-cpu" class="section level4">
+<h4>#SBATCH –ntasks=4 ### Run on a 4 CPU</h4>
+</div>
+<div id="sbatch-mem64gb-job-memory-request" class="section level4">
+<h4>#SBATCH –mem=64gb ### Job memory request</h4>
+</div>
+<div id="sbatch-time120000-time-limit-hrsminsec" class="section level4">
+<h4>#SBATCH –time=12:00:00 ### Time limit hrs:min:sec</h4>
+</div>
+<div id="sbatch-output.rna_seq_j.log-standard-output-and-error-log" class="section level4">
+<h4>#SBATCH –output=./rna_seq_%j.log ### Standard output and error log</h4>
+</div>
+<div id="sbatch--p-cpu_short-node" class="section level4">
+<h4>#SBATCH -p cpu_short ### Node</h4>
 <hr />
 <hr />
 <p>Download the Human Genome (hg38)</p>
@@ -336,148 +389,13 @@ $(document).ready(function () {
 <p>Create a feature counts matrix</p>
 </div>
 <div id="featurecounts--s-2--p--b--c--p-ignoredup-primary--a-.homo_sapiensucschg38annotationgenes.gencodegenes.gtf--g-gene_id--o-2_feature_counts-.2_sorted.bam" class="section level4">
-<h4>featureCounts -s 2 -p -B -C -P<br />
-#### –ignoreDup<br />
-#### –primary<br />
-#### -a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf<br />
-#### -g gene_id<br />
-#### -o <span class="math inline">\({2}_feature_counts \
-#### ./\)</span>{2}_sorted.bam</h4>
-<hr />
-<hr />
-<p>The final script should look like this:</p>
-<p>#!/bin/bash #SBATCH –job-name=rna_seq ### Job name</p>
-<p>#SBATCH –mail-type=END,FAIL ### Mail events (NONE, BEGIN, END, FAIL, ALL)</p>
-<p>#SBATCH –<a href="mailto:mail-user=name.last@school.org">mail-user=name.last@school.org</a> ### Where to send mail</p>
-<p>#SBATCH –ntasks=4 ### Run on a 4 CPU</p>
-<p>#SBATCH –mem=64gb ### Job memory request</p>
-<p>#SBATCH –time=12:00:00 ### Time limit hrs:min:sec</p>
-<p>#SBATCH –output=./rna_seq_%j.log ### Standard output and error log</p>
-<p>#SBATCH -p cpu_short ### Node</p>
-<p>Download the Human Genome (hg38)</p>
-</div>
-<div id="wget-ftpigenomeg3nom3s4uussd-ftp.illumina.comhomo_sapiensucschg38homo_sapiens_ucsc_hg38.tar.gz-1" class="section level4">
-<h4>wget <a href="ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz" class="uri">ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz</a></h4>
-</div>
-<div id="tar--zxvf-homo_sapiens_ucsc_hg38.tar.gz-1" class="section level4">
-<h4>tar -zxvf Homo_sapiens_UCSC_hg38.tar.gz</h4>
-<p>Import modules</p>
-</div>
-<div id="module-load-sratoolkit2.9.1-1" class="section level4">
-<h4>module load sratoolkit/2.9.1</h4>
-</div>
-<div id="module-load-fastqc0.11.7-1" class="section level4">
-<h4>module load fastqc/0.11.7</h4>
-</div>
-<div id="module-load-trimgalore0.5.0-1" class="section level4">
-<h4>module load trimgalore/0.5.0</h4>
-</div>
-<div id="module-load-pythoncpu2.7.15-es-cutadapt-is-hidden-in-here-1" class="section level4">
-<h4>module load python/cpu/2.7.15-ES ## CutAdapt is hidden in here</h4>
-</div>
-<div id="module-load-bbmap38.25-1" class="section level4">
-<h4>module load bbmap/38.25</h4>
-</div>
-<div id="module-load-samtools1.9-1" class="section level4">
-<h4>module load samtools/1.9</h4>
-</div>
-<div id="module-load-subread1.6.3-1" class="section level4">
-<h4>module load subread/1.6.3</h4>
-<p>Download Data from the SRA</p>
-</div>
-<div id="fastq-dump-1-split-files-gzip--o-.-1" class="section level4">
-<h4>fastq-dump ${1} –split-files –gzip -O ./</h4>
-<p>Remove fastq-dump directory</p>
-</div>
-<div id="rm--r-ncbi-1" class="section level4">
-<h4>rm -r ~/ncbi</h4>
-<p>Rename files</p>
-</div>
-<div id="mv-.1_1.fastq.gz-.2_1.fastq.gz" class="section level4">
-<h4>mv ./<span class="math inline">\({1}_1.fastq.gz ./\)</span>{2}_1.fastq.gz</h4>
-</div>
-<div id="mv-.1_2.fastq.gz-.2_2.fastq.gz" class="section level4">
-<h4>mv ./<span class="math inline">\({1}_2.fastq.gz ./\)</span>{2}_2.fastq.gz</h4>
-<p>Trim and run FASTQC</p>
-</div>
-<div id="trim_galore-q-30" class="section level4">
-<h4>trim_galore –q 30<br />
-</h4>
-</div>
-<div id="phred33" class="section level4">
-<h4>–phred33<br />
-</h4>
-</div>
-<div id="o-." class="section level4">
-<h4>-o ./<br />
-</h4>
-</div>
-<div id="paired" class="section level4">
-<h4>–paired<br />
-</h4>
-</div>
-<div id="fastqc" class="section level4">
-<h4>–fastqc<br />
-</h4>
-</div>
-<div id="fastq.gz-.2_2.fastq.gz" class="section level4">
-<h4>./<span class="math inline">\({2}_1.fastq.gz \
- #### ./\)</span>{2}_2.fastq.gz</h4>
-<p>Align reads to reference genome</p>
-</div>
-<div id="bbmap.sh" class="section level4">
-<h4>bbmap.sh<br />
-</h4>
-</div>
-<div id="xmx26g" class="section level4">
-<h4>-Xmx26G<br />
-</h4>
-</div>
-<div id="ref.hg38homo_sapiensucschg38sequencewholegenomefastagenome.fa" class="section level4">
-<h4>ref=./hg38/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa<br />
-</h4>
-</div>
-<div id="in.2_val_1.fq.gz-in2.2_val_2.fq.gz-outm.2.sam-minid0.90-ambiguousrandom-nodisk-convert-sam-file-to-bam-file-and-sort" class="section level4">
-<h4>in=./<span class="math inline">\({2}_val_1.fq.gz in2=./\)</span>{2}_val_2.fq.gz<br />
-#### outm=./${2}.sam<br />
-#### minid=0.90<br />
-#### ambiguous=random<br />
-#### nodisk<br />
-Convert SAM file to BAM file and sort</h4>
-</div>
-<div id="samtools-view--s--b-2.sam-2.bam-1" class="section level4">
-<h4>samtools view -S -b ${2}.sam &gt; ${2}.bam</h4>
-</div>
-<div id="samtools-sort-2.bam--o-2_sorted.bam-1" class="section level4">
-<h4>samtools sort ${2}.bam -o ${2}_sorted.bam</h4>
-<p>Create a feature counts matrix</p>
-</div>
-<div id="featurecounts--s-2--p--b--c--p" class="section level4">
-<h4>featureCounts -s 2 -p -B -C -P<br />
-</h4>
-</div>
-<div id="ignoredup" class="section level4">
-<h4>–ignoreDup<br />
-</h4>
-</div>
-<div id="primary" class="section level4">
-<h4>–primary<br />
-</h4>
-</div>
-<div id="a-.homo_sapiensucschg38annotationgenes.gencodegenes.gtf" class="section level4">
-<h4>-a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf<br />
-</h4>
-</div>
-<div id="g-gene_id" class="section level4">
-<h4>-g gene_id<br />
-</h4>
-</div>
-<div id="o-2_feature_counts-.2_sorted.bam" class="section level4">
-<h4>-o <span class="math inline">\({2}_feature_counts \
- #### ./\)</span>{2}_sorted.bam</h4>
-<hr />
+<h4>featureCounts -s 2 -p -B -C -P –ignoreDup –primary -a ./Homo_sapiens/UCSC/hg38/Annotation/Genes.gencode/genes.gtf -g gene_id -o <span class="math inline">\({2}_feature_counts ./\)</span>{2}_sorted.bam</h4>
 <hr />
 <p>Save the script as rna_seq_script.sh</p>
+<hr />
+<hr />
+<p>The final script should look include all of these commands. See ‘rna_seq_script.sh’ in the tutorial file for the final example.</p>
+<hr />
 <hr />
 <p>To run your submitter (this will submit all 8 scripts, one for each dataset)</p>
 </div>
